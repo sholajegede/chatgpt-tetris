@@ -9,7 +9,6 @@ export const createReplay = mutation({
     durationMs: v.number(),
   },
   handler: async (ctx, { gameId, userId, actions, durationMs }) => {
-    const now = Date.now();
     return await ctx.db.insert("replays", {
       gameId,
       userId,
@@ -29,14 +28,20 @@ export const getReplay = query({
 export const listByGame = query({
   args: { gameId: v.id("games") },
   handler: async (ctx, { gameId }) => {
-    return await ctx.db.query("replays").withIndex("by_game", (q) => q.eq("gameId", gameId)).collect();
+    return await ctx.db
+      .query("replays")
+      .withIndex("by_game", (q) => q.eq("gameId", gameId))
+      .collect();
   },
 });
 
 export const listByUser = query({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
-    return await ctx.db.query("replays").filter((q) => q.eq(q.field("userId"), userId)).collect();
+    return await ctx.db
+      .query("replays")
+      .filter((q) => q.eq(q.field("userId"), userId))
+      .collect();
   },
 });
 
@@ -64,9 +69,56 @@ export const deleteReplay = mutation({
 export const getRecentReplays = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, { limit }) => {
-    const all = await ctx.db.query("replays").collect();
-    const sorted = (all as any[]).sort((a, b) => (b._creationTime || 0) - (a._creationTime || 0));
-    if (limit) return sorted.slice(0, limit);
-    return sorted;
+    return await ctx.db
+      .query("replays")
+      .order("desc")
+      .take(limit ?? 10);
+  },
+});
+
+export const getRecentReplaysWithDetails = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, { limit }) => {
+    const replays = await ctx.db
+      .query("replays")
+      .order("desc")
+      .take(limit ?? 10);
+    
+    const withDetails = await Promise.all(
+      replays.map(async (replay) => {
+        const game = replay.gameId ? await ctx.db.get(replay.gameId) : null;
+        const user = replay.userId ? await ctx.db.get(replay.userId) : null;
+        
+        return {
+          ...replay,
+          game,
+          user,
+        };
+      })
+    );
+    
+    return withDetails;
+  },
+});
+
+export const getTopReplays = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, { limit }) => {
+    const replays = await ctx.db.query("replays").collect();
+    
+    const withScores = await Promise.all(
+      replays.map(async (replay) => {
+        const game = await ctx.db.get(replay.gameId);
+        return {
+          ...replay,
+          game,
+          score: game?.score ?? 0,
+        };
+      })
+    );
+    
+    const sorted = withScores.sort((a, b) => b.score - a.score);
+    
+    return limit ? sorted.slice(0, limit) : sorted;
   },
 });

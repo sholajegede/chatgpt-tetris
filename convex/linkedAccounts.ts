@@ -1,8 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-// Full CRUD + upsert helpers for linked accounts (OAuth)
-
 export const getByProviderSubject = query({
   args: { provider: v.string(), subject: v.string() },
   handler: async (ctx, { provider, subject }) => {
@@ -73,7 +71,6 @@ export const deleteLinkedAccount = mutation({
   },
 });
 
-// Upsert on sign-in: returns the linked account record (and creates a user if necessary)
 export const upsertOnSignIn = mutation({
   args: {
     provider: v.string(),
@@ -96,7 +93,6 @@ export const upsertOnSignIn = mutation({
       return await ctx.db.get(existing._id);
     }
 
-    // If userId not supplied, try to find by email in profile
     let resolvedUserId = userId;
     const email = profile && (profile as any).email;
     if (!resolvedUserId && email) {
@@ -107,7 +103,6 @@ export const upsertOnSignIn = mutation({
       if (user) resolvedUserId = user._id;
     }
 
-    // If still no user, create an account (email may be missing)
     if (!resolvedUserId) {
       const created = await ctx.db.insert("users", {
         email: email ?? `${provider}:${subject}`,

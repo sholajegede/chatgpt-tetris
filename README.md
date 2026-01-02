@@ -2,7 +2,7 @@
 
 A lightweight Tetris game that can be played inside ChatGPT as a ChatGPT app using the OpenAI Apps SDK. Play directly in ChatGPT, save replays, and compete on leaderboards without leaving the chat.
 
-## 🌟 Features
+## Features
 
 - **Play inside ChatGPT**: Play Tetris directly inside ChatGPT as a ChatGPT app using embedded widgets
 - **Replays**: Record, save, and share game replays; view and filter saved runs
@@ -11,7 +11,7 @@ A lightweight Tetris game that can be played inside ChatGPT as a ChatGPT app usi
 - **Controls**: Keyboard, touch, and basic gamepad support
 - **Responsive UI**: Lightweight, mobile-friendly widgets optimized for ChatGPT
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -23,8 +23,8 @@ A lightweight Tetris game that can be played inside ChatGPT as a ChatGPT app usi
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/sholajegede/chatgpt-tetris-app.git
-   cd chatgpt-tetris-app
+   git clone https://github.com/sholajegede/chatgpt-tetris.git
+   cd chatgpt-tetris
    ```
 
 2. Install dependencies:
@@ -43,11 +43,11 @@ A lightweight Tetris game that can be played inside ChatGPT as a ChatGPT app usi
    npm run dev
    ```
 
-## � Deploy to Vercel
+## Deploy to Vercel
 
 Deploy your Tetris with one click:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/sholajegede/chatgpt-tetris-app)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/sholajegede/chatgpt-tetris)
 
 ### Manual Deployment
 
@@ -56,7 +56,7 @@ Deploy your Tetris with one click:
 3. Set up the required environment variables
 4. Deploy!
 
-## �🔧 Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -77,7 +77,7 @@ NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL=${VERCEL_PROJECT_PRODUCTION_URL}
 # NEXT_PUBLIC_CONVEX_URL=https://your-convex-instance
 ```
 
-## 🛠️ Development
+## Development
 
 ### Project Structure
 
@@ -101,7 +101,7 @@ NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL=${VERCEL_PROJECT_PRODUCTION_URL}
 - `npm test` - Run tests
 - `npm run lint` - Run ESLint
 
-## 🤖 Integration with ChatGPT
+## Integration with ChatGPT
 
 This app integrates with ChatGPT using the OpenAI Apps SDK, allowing users to play Tetris directly inside ChatGPT as a ChatGPT app. The MCP server exposes tools and widget resources used by the ChatGPT app to render the game UI and fetch leaderboard and replay data.
 
@@ -112,14 +112,14 @@ This app integrates with ChatGPT using the OpenAI Apps SDK, allowing users to pl
 - "Show my saved replays"
 - "Start a new anonymous game"
 
-## 🔧 How It Works
+## How It Works
 
 1. **Tool Invocation**: A ChatGPT app calls a tool registered in `app/mcp/route.ts`
 2. **Game Processing**: The MCP server creates/fetches game and replay records in Convex
 3. **Widget Rendering**: Game board, leaderboards, and replay viewers are rendered in interactive widgets
 4. **Real-time Updates**: Leaderboards and replays reflect new finishes and saves
 
-## �📚 Documentation
+## Documentation
 
 For detailed documentation on the OpenAI Apps SDK and MCP server implementation, please refer to:
 
@@ -128,7 +128,7 @@ For detailed documentation on the OpenAI Apps SDK and MCP server implementation,
 - [Widget Development Guide](https://developers.openai.com/apps-sdk/build/widgets)
 - [Next.js Documentation](https://nextjs.org/docs)
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please follow these steps:
 
@@ -138,13 +138,13 @@ Contributions are welcome! Please follow these steps:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-Built with ❤️ using Next.js and the OpenAI Apps SDK
+Built with ❤️ by Shola Jegede using Next.js and the OpenAI Apps SDK
 
 ```typescript
 const nextConfig: NextConfig = {
@@ -219,7 +219,7 @@ http://localhost:3000/mcp
 
 1. Deploy your app to Vercel using the button below:
 
-   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/sholajegede/chatgpt-tetris-app)
+   [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/sholajegede/chatgpt-tetris)
 
 2. After deployment, copy your deployed URL (e.g., `https://your-app.vercel.app`)
 
@@ -260,7 +260,7 @@ next.config.ts            # Asset prefix configuration
 
 This project is designed to work seamlessly with [Vercel](https://vercel.com) deployment. The `baseUrl.ts` configuration automatically detects Vercel environment variables and sets the correct asset URLs.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/sholajegede/chatgpt-tetris-app)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/sholajegede/chatgpt-tetris)
 
 The configuration automatically handles:
 - Production URLs via `VERCEL_PROJECT_PRODUCTION_URL`

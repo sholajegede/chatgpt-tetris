@@ -29,7 +29,6 @@ export const getEntry = query({
 export const listTop = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, { limit }) => {
-    // Use the by_score index then sort descending (Convex indexes are ascending)
     const all = await ctx.db.query("leaderboards").withIndex("by_score").collect();
     const sorted = (all as any[]).sort((a, b) => b.score - a.score);
     if (limit) return sorted.slice(0, limit);
@@ -67,7 +66,6 @@ export const deleteEntry = mutation({
   },
 });
 
-// Optional: prune old entries older than maxAgeMs, returns deleted count
 export const pruneOldEntries = mutation({
   args: { maxAgeMs: v.number() },
   handler: async (ctx, { maxAgeMs }) => {
