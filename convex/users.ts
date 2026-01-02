@@ -1,8 +1,5 @@
-// convex/users.ts
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-
-// User helpers aligned to the Tetris schema.
 
 export const getByEmail = query({
   args: { email: v.string() },
@@ -18,6 +15,16 @@ export const getById = query({
   args: { userId: v.id("users") },
   handler: async (ctx, { userId }) => {
     return await ctx.db.get(userId);
+  },
+});
+
+export const getMultipleById = query({
+  args: { userIds: v.array(v.id("users")) },
+  handler: async (ctx, { userIds }) => {
+    const users = await Promise.all(
+      userIds.map(id => ctx.db.get(id))
+    );
+    return users;
   },
 });
 
@@ -79,7 +86,6 @@ export const patchProfile = mutation({
   },
 });
 
-// Upsert a linked account from an OAuth provider. Returns the user id.
 export const upsertLinkedAccount = mutation({
   args: {
     provider: v.string(),
@@ -89,19 +95,16 @@ export const upsertLinkedAccount = mutation({
   handler: async (ctx, { provider, subject, profile }) => {
     const now = Date.now();
 
-    // 1) Find linked account by provider+subject
     const linked = await ctx.db
       .query("linkedAccounts")
       .withIndex("by_provider_subject", (q) => q.eq("provider", provider).eq("subject", subject))
       .first();
 
     if (linked) {
-      // update timestamp/profile
       await ctx.db.patch(linked._id, { profile: profile ?? linked.profile, updatedAt: now });
       return linked.userId;
     }
 
-    // 2) Try to match an existing user by email if present in profile
     let user = null;
     const email = profile && (profile as any).email;
     if (email) {
@@ -111,7 +114,6 @@ export const upsertLinkedAccount = mutation({
         .first();
     }
 
-    // 3) Create a user if none found
     if (!user) {
       const created = await ctx.db.insert("users", {
         email: email ?? `${provider}:${subject}`,
@@ -121,8 +123,7 @@ export const upsertLinkedAccount = mutation({
       });
       user = created;
     }
-
-    // 4) Insert linked account pointing to the user
+    
     const userId = typeof user === "string" ? user : user._id;
     const linkedInsert = await ctx.db.insert("linkedAccounts", {
       provider,

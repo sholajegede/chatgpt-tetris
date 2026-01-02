@@ -2,40 +2,63 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useCallTool, useSendMessage } from "@/app/hooks";
+import { Id } from "@/convex/_generated/dataModel";
 
 const WIDTH = 10;
 const HEIGHT = 20;
 
 const PIECES: Record<string, number[][]> = {
   I: [[1, 1, 1, 1]],
-  O: [[1, 1], [1, 1]],
-  T: [[0, 1, 0], [1, 1, 1]],
-  S: [[0, 1, 1], [1, 1, 0]],
-  Z: [[1, 1, 0], [0, 1, 1]],
-  J: [[1, 0, 0], [1, 1, 1]],
-  L: [[0, 0, 1], [1, 1, 1]],
+  O: [
+    [1, 1],
+    [1, 1],
+  ],
+  T: [
+    [0, 1, 0],
+    [1, 1, 1],
+  ],
+  S: [
+    [0, 1, 1],
+    [1, 1, 0],
+  ],
+  Z: [
+    [1, 1, 0],
+    [0, 1, 1],
+  ],
+  J: [
+    [1, 0, 0],
+    [1, 1, 1],
+  ],
+  L: [
+    [0, 0, 1],
+    [1, 1, 1],
+  ],
 };
 
 const PIECE_COLORS: Record<string, string> = {
-  I: '#00f0f0',
-  O: '#f0f000',
-  T: '#a000f0',
-  S: '#00f000',
-  Z: '#f00000',
-  J: '#0000f0',
-  L: '#f0a000',
+  I: "#00f0f0",
+  O: "#f0f000",
+  T: "#a000f0",
+  S: "#00f000",
+  Z: "#f00000",
+  J: "#0000f0",
+  L: "#f0a000",
 };
 
 const PIECE_TYPES = Object.keys(PIECES);
 
 function emptyBoard() {
-  return Array.from({ length: HEIGHT }, () => Array.from({ length: WIDTH }, () => 0));
+  return Array.from({ length: HEIGHT }, () =>
+    Array.from({ length: WIDTH }, () => 0)
+  );
 }
 
 function rotate(shape: number[][]) {
   const h = shape.length;
   const w = shape[0].length;
-  const out = Array.from({ length: w }, () => Array.from({ length: h }, () => 0));
+  const out = Array.from({ length: w }, () =>
+    Array.from({ length: h }, () => 0)
+  );
   for (let r = 0; r < h; r++) {
     for (let c = 0; c < w; c++) {
       out[c][h - 1 - r] = shape[r][c];
@@ -59,8 +82,15 @@ function canPlace(board: number[][], shape: number[][], x: number, y: number) {
 
 export default function GameBoard() {
   const [board, setBoard] = useState<number[][]>(emptyBoard());
-  const [current, setCurrent] = useState<{ type: string; shape: number[][]; x: number; y: number } | null>(null);
-  const [next, setNext] = useState<string>(() => PIECE_TYPES[Math.floor(Math.random() * PIECE_TYPES.length)]);
+  const [current, setCurrent] = useState<{
+    type: string;
+    shape: number[][];
+    x: number;
+    y: number;
+  } | null>(null);
+  const [next, setNext] = useState<string>(
+    () => PIECE_TYPES[Math.floor(Math.random() * PIECE_TYPES.length)]
+  );
   const [running, setRunning] = useState(false);
   const [score, setScore] = useState(0);
   const [lines, setLines] = useState(0);
@@ -74,19 +104,29 @@ export default function GameBoard() {
 
   const callTool = useCallTool();
   const sendMessage = useSendMessage();
-  const [gameId, setGameId] = useState<string | null>(null);
+  const [gameId, setGameId] = useState<Id<"games"> | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
-    bgMusicRef.current = new Audio('https://cdn.freesound.org/previews/612/612091_3283808-lq.mp3');
+    bgMusicRef.current = new Audio(
+      "https://cdn.freesound.org/previews/612/612091_3283808-lq.mp3"
+    );
     bgMusicRef.current.loop = true;
     bgMusicRef.current.volume = 0.3;
-    bgMusicRef.current.addEventListener('error', (e) => console.error('Background music load error:', e));
-    bgMusicRef.current.addEventListener('canplay', () => console.log('Background music ready'));
+    bgMusicRef.current.addEventListener("error", (e) =>
+      console.error("Background music load error:", e)
+    );
+    bgMusicRef.current.addEventListener("canplay", () =>
+      console.log("Background music ready")
+    );
 
-    clearSoundRef.current = new Audio('https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3');
+    clearSoundRef.current = new Audio(
+      "https://cdn.freesound.org/previews/341/341695_5858296-lq.mp3"
+    );
     clearSoundRef.current.volume = 0.5;
-    clearSoundRef.current.addEventListener('error', (e) => console.error('Clear sound load error:', e));
+    clearSoundRef.current.addEventListener("error", (e) =>
+      console.error("Clear sound load error:", e)
+    );
 
     return () => {
       if (bgMusicRef.current) {
@@ -103,7 +143,9 @@ export default function GameBoard() {
     if (running && musicEnabled && bgMusicRef.current) {
       if (bgMusicRef.current.paused) {
         bgMusicRef.current.currentTime = 0;
-        bgMusicRef.current.play().catch(e => console.log('Background music play failed:', e));
+        bgMusicRef.current
+          .play()
+          .catch((e) => console.log("Background music play failed:", e));
       }
     } else if (bgMusicRef.current && !bgMusicRef.current.paused) {
       bgMusicRef.current.pause();
@@ -118,7 +160,9 @@ export default function GameBoard() {
     if (running) {
       const interval = Math.max(200, 1000 - (level - 1) * 100);
       tickRef.current = window.setInterval(drop, interval);
-      return () => { if (tickRef.current) clearInterval(tickRef.current); };
+      return () => {
+        if (tickRef.current) clearInterval(tickRef.current);
+      };
     } else {
       if (tickRef.current) clearInterval(tickRef.current);
     }
@@ -129,37 +173,36 @@ export default function GameBoard() {
       if (!running) return;
       if (e.key === "ArrowLeft") {
         e.preventDefault();
-        move(-1, 0, 'L');
+        move(-1, 0, "L");
       }
       if (e.key === "ArrowRight") {
         e.preventDefault();
-        move(1, 0, 'R');
+        move(1, 0, "R");
       }
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        move(0, 1, 'D');
+        move(0, 1, "D");
       }
       if (e.key === " ") {
         e.preventDefault();
-        rotateCurrent('ROT');
+        rotateCurrent("ROT");
       }
       if (e.key === "ArrowUp") {
         e.preventDefault();
-        rotateCurrent('ROT');
+        rotateCurrent("ROT");
       }
     };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, [running, current]);
 
   function spawnNext(boardParam?: number[][]) {
     const currentBoard = boardParam ?? board;
     const type = next;
-    const shape = PIECES[type].map(r => [...r]);
+    const shape = PIECES[type].map((r) => [...r]);
     const x = Math.floor((WIDTH - shape[0].length) / 2);
     const y = 0;
     if (!canPlace(currentBoard, shape, x, y)) {
-      setRunning(false);
       finish();
       return;
     }
@@ -168,7 +211,7 @@ export default function GameBoard() {
   }
 
   function mergeCurrentToBoard(brd: number[][], cur: any) {
-    const copy = brd.map(r => [...r]);
+    const copy = brd.map((r) => [...r]);
     if (!cur) return copy;
     for (let r = 0; r < cur.shape.length; r++) {
       for (let c = 0; c < cur.shape[0].length; c++) {
@@ -188,9 +231,14 @@ export default function GameBoard() {
     let cleared = 0;
     const out: number[][] = [];
     for (let r = 0; r < HEIGHT; r++) {
-      if (brd[r].every(v => v !== 0)) { cleared++; } else { out.push(brd[r]); }
+      if (brd[r].every((v) => v !== 0)) {
+        cleared++;
+      } else {
+        out.push(brd[r]);
+      }
     }
-    while (out.length < HEIGHT) out.unshift(Array.from({ length: WIDTH }, () => 0));
+    while (out.length < HEIGHT)
+      out.unshift(Array.from({ length: WIDTH }, () => 0));
     return { board: out, cleared };
   }
 
@@ -203,25 +251,30 @@ export default function GameBoard() {
       if (actionCode) actionsRef.current.push({ t: Date.now(), a: actionCode });
     } else {
       if (dy === 1) {
-        const pieceTypeIndex = PIECE_TYPES.indexOf(current.type) + 1;
-        const merged = mergeCurrentToBoard(board, current).map(r => r.map(v => (v >= 10 ? pieceTypeIndex : v)));
-        const { board: newBoard, cleared } = clearLines(merged);
+        const merged = mergeCurrentToBoard(board, current);
+        const normalized = merged.map((r) =>
+          r.map((v) => (v >= 10 ? v - 9 : v))
+        );
+
+        const { board: newBoard, cleared } = clearLines(normalized);
         if (cleared > 0) {
           if (clearSoundRef.current && musicEnabled) {
             clearSoundRef.current.currentTime = 0;
-            clearSoundRef.current.play().catch(e => console.log('Sound play failed:', e));
+            clearSoundRef.current
+              .play()
+              .catch((e) => console.log("Sound play failed:", e));
           }
 
           const clearingRowIndices: number[] = [];
           for (let r = 0; r < HEIGHT; r++) {
-            if (merged[r].every(v => v !== 0)) {
+            if (normalized[r].every((v) => v !== 0)) {
               clearingRowIndices.push(r);
             }
           }
           setClearingRows(clearingRowIndices);
 
-          setScore(s => s + cleared * 100);
-          setLines(prev => {
+          setScore((s) => s + cleared * 100);
+          setLines((prev) => {
             const newLines = prev + cleared;
             setLevel(Math.floor(newLines / 10) + 1);
             return newLines;
@@ -251,7 +304,7 @@ export default function GameBoard() {
     }
   }
 
-  function start() {
+  async function start() {
     const b = emptyBoard();
     setBoard(b);
     setScore(0);
@@ -264,19 +317,25 @@ export default function GameBoard() {
 
     (async () => {
       try {
-        const res = await fetch('/api/create-game', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({}),
-        });
-        if (res.ok) {
-          const json = await res.json();
-          if (json && json.gameId) setGameId(String(json.gameId));
-        } else {
-          console.warn('create-game API returned non-OK status', res.status);
+        const toolRes = await callTool?.("start_game", {});
+        console.log("start_game tool response:", toolRes);
+
+        if (toolRes) {
+          const response = toolRes as any;
+
+          if (response.structuredContent?.gameId) {
+            const gameIdToUse = response.structuredContent.gameId;
+            setGameId(gameIdToUse);
+            console.log("Game ID captured:", gameIdToUse);
+          } else {
+            console.warn(
+              "No game ID found in structuredContent. Full response:",
+              response
+            );
+          }
         }
       } catch (err) {
-        console.error('Failed to create game record:', err);
+        console.error("Failed to create game record:", err);
       }
     })();
 
@@ -286,12 +345,32 @@ export default function GameBoard() {
   async function finish() {
     setRunning(false);
 
-    const durationMs = startTimeRef.current ? Date.now() - startTimeRef.current : undefined;
+    const durationMs = startTimeRef.current
+      ? Date.now() - startTimeRef.current
+      : undefined;
     const replayActions = actionsRef.current.slice();
+
+    console.log("Finishing game:", {
+      gameId,
+      score,
+      level,
+      lines,
+      durationMs,
+      actionCount: replayActions.length,
+    });
 
     if (gameId && callTool) {
       try {
-        await callTool("finish_game", {
+        console.log("Calling finish_game tool with:", {
+          gameId,
+          score,
+          level,
+          linesCleared: lines,
+          replayActionsCount: replayActions.length,
+          durationMs,
+        });
+
+        const result = await callTool("finish_game", {
           gameId,
           score,
           level,
@@ -299,15 +378,33 @@ export default function GameBoard() {
           replayActions,
           durationMs,
         });
+
+        console.log("finish_game result:", result);
+
+        const response = result as any;
+        let message = `🎮 Game finished! Score: ${score}, Level: ${level}, Lines: ${lines}`;
+
+        if (response?.content?.[0]?.text) {
+          message = response.content[0].text;
+        }
+
+        await sendMessage?.(message);
       } catch (err) {
         console.error("Error finishing game via MCP:", err);
+        await sendMessage?.(
+          `Game finished locally — Score: ${score}, Level: ${level}, Lines: ${lines} (Could not save: ${
+            err instanceof Error ? err.message : String(err)
+          })`
+        );
       }
-    }
-
-    try {
-      await sendMessage?.(`Game finished — Score: ${score}, Level: ${level}, Lines: ${lines}${gameId ? ` (Game ID: ${gameId})` : ""}`);
-    } catch (err) {
-      console.error("Error sending follow-up message:", err);
+    } else {
+      console.warn("Cannot finish game:", {
+        hasGameId: !!gameId,
+        hasCallTool: !!callTool,
+      });
+      await sendMessage?.(
+        `Game finished locally — Score: ${score}, Level: ${level}, Lines: ${lines} (No game ID to save)`
+      );
     }
 
     setBoard(emptyBoard());
@@ -319,8 +416,6 @@ export default function GameBoard() {
     actionsRef.current = [];
     setGameId(null);
     startTimeRef.current = null;
-
-    console.log('Game finished!', { score, level, lines });
   }
 
   function renderNextPiece() {
@@ -330,12 +425,14 @@ export default function GameBoard() {
     const miniCellSize = 16;
 
     return (
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: `repeat(${gridSize}, ${miniCellSize}px)`,
-        gap: 1,
-        justifyContent: 'center'
-      }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${gridSize}, ${miniCellSize}px)`,
+          gap: 1,
+          justifyContent: "center",
+        }}
+      >
         {Array.from({ length: gridSize }).map((_, r) =>
           Array.from({ length: gridSize }).map((_, c) => {
             const inShape = shape[r] && shape[r][c];
@@ -345,9 +442,9 @@ export default function GameBoard() {
                 style={{
                   width: miniCellSize,
                   height: miniCellSize,
-                  background: inShape ? color : 'transparent',
-                  border: inShape ? '1px solid rgba(0,0,0,0.3)' : 'none',
-                  borderRadius: 2
+                  background: inShape ? color : "transparent",
+                  border: inShape ? "1px solid rgba(0,0,0,0.3)" : "none",
+                  borderRadius: 2,
                 }}
               />
             );
@@ -361,7 +458,7 @@ export default function GameBoard() {
   const boardWidth = cellPx * WIDTH;
 
   function getCellColor(value: number): string {
-    if (value === 0) return '#0f172a';
+    if (value === 0) return "#0f172a";
     if (value >= 10) {
       const typeIndex = value - 10;
       return PIECE_COLORS[PIECE_TYPES[typeIndex]];
@@ -373,50 +470,79 @@ export default function GameBoard() {
   return (
     <div className="mx-auto p-4" style={{ maxWidth: 720 }}>
       <div className="flex items-center justify-between mb-4">
-        <div><strong>Score:</strong> {score}</div>
-        <div><strong>Level:</strong> {level}</div>
-        <div><strong>Lines:</strong> {lines}</div>
+        <div>
+          <strong>Score:</strong> {score}
+        </div>
+        <div>
+          <strong>Level:</strong> {level}
+        </div>
+        <div>
+          <strong>Lines:</strong> {lines}
+        </div>
         <button
           onClick={() => setMusicEnabled(!musicEnabled)}
           style={{
-            background: musicEnabled ? 'linear-gradient(145deg, #10b981, #059669)' : 'linear-gradient(145deg, #6b7280, #4b5563)',
-            color: 'white',
-            border: 'none',
-            padding: '6px 12px',
-            borderRadius: '6px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            fontSize: '12px'
+            background: musicEnabled
+              ? "linear-gradient(145deg, #10b981, #059669)"
+              : "linear-gradient(145deg, #6b7280, #4b5563)",
+            color: "white",
+            border: "none",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            fontWeight: "600",
+            cursor: "pointer",
+            fontSize: "12px",
           }}
         >
-          {musicEnabled ? '🔊 Music On' : '🔇 Music Off'}
+          {musicEnabled ? "🔊 Music On" : "🔇 Music Off"}
         </button>
       </div>
       <div className="flex gap-6 items-start">
         <div className="border bg-slate-900 p-2" style={{ width: boardWidth }}>
-          <div className="grid" style={{ gridTemplateColumns: `repeat(${WIDTH}, ${cellPx}px)`, gap: 0 }}>
-            {display.flatMap((row, r) => row.map((cell, c) => {
-              const isClearing = clearingRows.includes(r);
-              return (
-                <div key={`${r}-${c}`} style={{
-                  width: cellPx,
-                  height: cellPx,
-                  boxSizing: 'border-box',
-                  border: '1px solid rgba(100,116,139,0.3)',
-                  background: getCellColor(cell),
-                  opacity: isClearing ? 0.5 : 1,
-                  transform: isClearing ? 'scale(1.05)' : 'scale(1)',
-                  transition: 'all 0.2s ease-in-out'
-                }} />
-              );
-            }))}
+          <div
+            className="grid"
+            style={{
+              gridTemplateColumns: `repeat(${WIDTH}, ${cellPx}px)`,
+              gap: 0,
+            }}
+          >
+            {display.flatMap((row, r) =>
+              row.map((cell, c) => {
+                const isClearing = clearingRows.includes(r);
+                return (
+                  <div
+                    key={`${r}-${c}`}
+                    style={{
+                      width: cellPx,
+                      height: cellPx,
+                      boxSizing: "border-box",
+                      border: "1px solid rgba(100,116,139,0.3)",
+                      background: getCellColor(cell),
+                      opacity: isClearing ? 0.5 : 1,
+                      transform: isClearing ? "scale(1.05)" : "scale(1)",
+                      transition: "all 0.2s ease-in-out",
+                    }}
+                  />
+                );
+              })
+            )}
           </div>
         </div>
 
         <div className="mt-2">
-          <div className="mb-2"><strong>Next</strong></div>
+          <div className="mb-2">
+            <strong>Next</strong>
+          </div>
           <div className="bg-slate-800 p-3 rounded">
-            <div style={{ width: 80, height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div
+              style={{
+                width: 80,
+                height: 80,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               {renderNextPiece()}
             </div>
           </div>
@@ -428,62 +554,64 @@ export default function GameBoard() {
           className="btn"
           onClick={start}
           style={{
-            background: 'linear-gradient(145deg, #f59e0b, #d97706)',
-            color: 'white',
-            border: 'none',
-            padding: '10px 20px',
-            borderRadius: '8px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+            background: "linear-gradient(145deg, #f59e0b, #d97706)",
+            color: "white",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "8px",
+            fontWeight: "600",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
           }}
         >
           ▶ Start
         </button>
         <button
           className="btn"
-          onClick={() => setRunning(s => !s)}
+          onClick={() => setRunning((s) => !s)}
           style={{
-            background: 'linear-gradient(145deg, #3b82f6, #2563eb)',
-            color: 'white',
-            border: 'none',
-            padding: '10px 20px',
-            borderRadius: '8px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+            background: "linear-gradient(145deg, #3b82f6, #2563eb)",
+            color: "white",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "8px",
+            fontWeight: "600",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
           }}
         >
-          {running ? '⏸ Pause' : '▶ Resume'}
+          {running ? "⏸ Pause" : "▶ Resume"}
         </button>
         <button
           className="btn"
-          onClick={() => { rotateCurrent(); }}
+          onClick={() => {
+            rotateCurrent();
+          }}
           style={{
-            background: 'linear-gradient(145deg, #10b981, #059669)',
-            color: 'white',
-            border: 'none',
-            padding: '10px 20px',
-            borderRadius: '8px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+            background: "linear-gradient(145deg, #10b981, #059669)",
+            color: "white",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "8px",
+            fontWeight: "600",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
           }}
         >
           ↻ Rotate
         </button>
         <button
           className="btn"
-          onClick={() => move(0, 1, 'D')}
+          onClick={() => move(0, 1, "D")}
           style={{
-            background: 'linear-gradient(145deg, #ec4899, #db2777)',
-            color: 'white',
-            border: 'none',
-            padding: '10px 20px',
-            borderRadius: '8px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+            background: "linear-gradient(145deg, #ec4899, #db2777)",
+            color: "white",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "8px",
+            fontWeight: "600",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
           }}
         >
           ↓ Drop
@@ -492,14 +620,14 @@ export default function GameBoard() {
           className="btn"
           onClick={() => finish()}
           style={{
-            background: 'linear-gradient(145deg, #ef4444, #dc2626)',
-            color: 'white',
-            border: 'none',
-            padding: '10px 20px',
-            borderRadius: '8px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+            background: "linear-gradient(145deg, #ef4444, #dc2626)",
+            color: "white",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "8px",
+            fontWeight: "600",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
           }}
         >
           ✕ End
